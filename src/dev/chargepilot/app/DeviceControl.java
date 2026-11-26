@@ -27,7 +27,7 @@ public final class DeviceControl extends Binder {
     enum Operation {
         PING, WAKE, NORMAL, SAVER, ONLINE, AIRPLANE, LOCATION_ON, LOCATION_OFF,
         HOTSPOT_ON, HOTSPOT_OFF, LAUNCH_TMAP, LAUNCH_NAVER, NAV_ACTIVE_TMAP, NAV_ACTIVE_NAVER,
-        STOP_TMAP, STOP_NAVER
+        STOP_TMAP, STOP_NAVER, HOME
     }
     private final Context context;
     private final int appUid;
@@ -92,6 +92,7 @@ public final class DeviceControl extends Binder {
         switch (operation) {
             case PING: return Integer.toString(android.os.Process.myUid());
             case WAKE: return command("input", "keyevent", "KEYCODE_WAKEUP");
+            case HOME: return command("input", "keyevent", "KEYCODE_HOME");
             case NORMAL: return command("cmd", "power", "set-mode", "0");
             case SAVER: return command("cmd", "power", "set-mode", "1");
             case ONLINE: return command("cmd", "connectivity", "airplane-mode", "disable");

@@ -1,9 +1,9 @@
 {
-  "versionCode": 7,
-  "versionName": "1.0.6",
+  "versionCode": 8,
+  "versionName": "1.0.7",
   "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
-  "sha256": "08da9bc6ef30eb23bb0b78a8ebe3e0ae9adf2f3fb91b1aa5262f7f690b0409c8",
+  "sha256": "97cbeda5c8ff78a41691150bf9e5312c17de4be39650775dcd7978094de826ce",
   "releaseNotes": {
-    "ko": "Shizuku 연결이 끊긴 동안 전원이 10초 이상 차단되면 권한 복구 후 주행 준비를 다시 실행합니다."
+    "ko": "충전 전원이 10초 이상 차단되어 종료 작업을 마치면 안드로이드 홈 화면으로 돌아갑니다."
   }
 }

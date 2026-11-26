@@ -107,7 +107,7 @@ public final class MonitorService extends Service {
         wake = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "kisa_tasker:charge_transition");
         wake.setReferenceCounted(false);
         args = new Shizuku.UserServiceArgs(new ComponentName(this, DeviceControl.class))
-                .daemon(false).processNameSuffix("device_control").version(4);
+                .daemon(false).processNameSuffix("device_control").version(5);
         NotificationManager notifications = getSystemService(NotificationManager.class);
         notifications.createNotificationChannel(new NotificationChannel(CHANNEL,
                 "충전 연결 감시", NotificationManager.IMPORTANCE_LOW));
@@ -334,6 +334,11 @@ public final class MonitorService extends Service {
         checkSetting(token, SAVER, "절전 모드", power::isPowerSaveMode);
         ensureStopped(token, State.NAVER, "네이버지도", NAV_ACTIVE_NAVER, STOP_NAVER);
         ensureStopped(token, State.TMAP, "티맵", NAV_ACTIVE_TMAP, STOP_TMAP);
+        if (!current(token)) return;
+        Intent battery = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (battery != null && !wired(battery)) {
+            operate(token, HOME, "홈 화면 전환");
+        }
     }
 
     private void finishNav(int token, String pkg, String label, DeviceControl.Operation runningOp,
