@@ -1,9 +1,9 @@
 {
-  "versionCode": 5,
-  "versionName": "1.0.4",
+  "versionCode": 6,
+  "versionName": "1.0.5",
   "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
-  "sha256": "7f2ccb0a53e4543eadffce5bd2459616ec89d88d9baeac6d32092aadd95c7b08",
+  "sha256": "74e95353ede997670e147842fc3e5518ba1007a66929ea7b32dd2ddf2ec10de7",
   "releaseNotes": {
-    "ko": "충전 연결 후 자동으로 실행할 내비를 티맵이나 네이버지도 중에서 선택할 수 있습니다."
+    "ko": "앱 표시 이름을 KisaTasker로 변경했습니다."
   }
 }

@@ -390,7 +390,7 @@ public final class MonitorService extends Service {
                 new Intent(this, MonitorService.class).setAction(PAUSE),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         return new Notification.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_status)
-                .setContentTitle("차량 충전 자동화").setContentText(text).setContentIntent(open)
+                .setContentTitle(getString(R.string.app_name)).setContentText(text).setContentIntent(open)
                 .setOngoing(true).setOnlyAlertOnce(true).setVisibility(Notification.VISIBILITY_PRIVATE)
                 .addAction(new Notification.Action.Builder(null, "일시정지", pause).build()).build();
     }

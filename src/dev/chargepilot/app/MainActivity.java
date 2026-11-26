@@ -69,7 +69,7 @@ public final class MainActivity extends Activity {
         page.setPadding(dp(22), dp(22), dp(22), dp(28));
         scroll.addView(page);
 
-        page.addView(text("차량 충전 자동화", 30, DARK, true));
+        page.addView(text(getString(R.string.app_name), 30, DARK, true));
         page.addView(text("유선 전원으로 내비와 운전 중 설정을 제어합니다.", 14, MUTED, false));
 
         LinearLayout status = card(page);

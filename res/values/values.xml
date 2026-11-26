@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">차량 충전 자동화</string>
-    <string name="access_name">차량 충전 자동화 · 경로 종료</string>
+    <string name="app_name">KisaTasker</string>
+    <string name="access_name">KisaTasker · 경로 종료</string>
     <string name="access_description">유선 전원이 끊긴 뒤 티맵과 네이버지도의 안내 종료 버튼을 찾고 누릅니다. 해당 앱의 버튼 글자만 기기 안에서 확인합니다.</string>
     <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
