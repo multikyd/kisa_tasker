@@ -22,6 +22,10 @@ final class PowerCycle {
 
     void update(boolean hasPower, long now, long connectionDelay) {
         if (wired == hasPower) return;
+        if (hasPower && active && deadline != NONE && now >= deadline) {
+            // End the previous session logically. A missed cutoff should not run after power returns.
+            active = false;
+        }
         wired = hasPower;
         if (wired == active) {
             deadline = NONE;

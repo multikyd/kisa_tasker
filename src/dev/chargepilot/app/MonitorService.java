@@ -171,12 +171,15 @@ public final class MonitorService extends Service {
 
     private void observe(boolean supplied, long now) {
         boolean before = cycle.isWired();
+        boolean wasActive = cycle.isActive();
         cycle.update(supplied, now, delay());
         if (before == supplied) return;
-        prefs.edit().putLong(State.CUTOFF,
+        prefs.edit().putBoolean(State.ACTIVE, cycle.isActive()).putLong(State.CUTOFF,
                 !supplied && cycle.isActive() ? now : PowerCycle.NONE).apply();
         if (supplied && cycle.isActive()) {
             State.log(this, "10초 이내 전원 복구 · 주행 유지");
+        } else if (supplied && wasActive) {
+            State.log(this, "종료 유예 이후 전원 복구 · 주행 준비 다시 예약");
         } else {
             State.log(this, supplied ? "유선 전원 연결" : "유선 전원 차단");
         }

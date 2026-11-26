@@ -1,9 +1,9 @@
 {
-  "versionCode": 6,
-  "versionName": "1.0.5",
+  "versionCode": 7,
+  "versionName": "1.0.6",
   "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
-  "sha256": "74e95353ede997670e147842fc3e5518ba1007a66929ea7b32dd2ddf2ec10de7",
+  "sha256": "08da9bc6ef30eb23bb0b78a8ebe3e0ae9adf2f3fb91b1aa5262f7f690b0409c8",
   "releaseNotes": {
-    "ko": "앱 표시 이름을 KisaTasker로 변경했습니다."
+    "ko": "Shizuku 연결이 끊긴 동안 전원이 10초 이상 차단되면 권한 복구 후 주행 준비를 다시 실행합니다."
   }
 }

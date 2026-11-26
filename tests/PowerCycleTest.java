@@ -32,6 +32,23 @@ public final class PowerCycleTest {
             throw new AssertionError("Tried to act without privileges");
         }
         expect(afterBoot, 18_000, PowerCycle.Action.START);
+
+        PowerCycle interrupted = new PowerCycle(true, true, 0, 3000, -1);
+        interrupted.update(false, 1_000, 3000);
+        if (interrupted.ready(11_000, false) != PowerCycle.Action.NONE) {
+            throw new AssertionError("Tried to stop without privileges");
+        }
+        interrupted.update(true, 11_000, 3000);
+        expect(interrupted, 13_999, PowerCycle.Action.NONE);
+        if (interrupted.ready(14_000, false) != PowerCycle.Action.NONE) {
+            throw new AssertionError("Tried to start without privileges");
+        }
+        expect(interrupted, 15_000, PowerCycle.Action.START);
+
+        PowerCycle quickRecovery = new PowerCycle(true, true, 0, 3000, -1);
+        quickRecovery.update(false, 1_000, 3000);
+        quickRecovery.update(true, 10_999, 3000);
+        expect(quickRecovery, 18_000, PowerCycle.Action.NONE);
         System.out.println("PowerCycle tests passed");
     }
 
