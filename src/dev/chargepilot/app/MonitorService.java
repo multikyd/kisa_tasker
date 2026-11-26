@@ -107,7 +107,7 @@ public final class MonitorService extends Service {
         wake = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "kisa_tasker:charge_transition");
         wake.setReferenceCounted(false);
         args = new Shizuku.UserServiceArgs(new ComponentName(this, DeviceControl.class))
-                .daemon(false).processNameSuffix("device_control").version(1);
+                .daemon(false).processNameSuffix("device_control").version(2);
         NotificationManager notifications = getSystemService(NotificationManager.class);
         notifications.createNotificationChannel(new NotificationChannel(CHANNEL,
                 "충전 연결 감시", NotificationManager.IMPORTANCE_LOW));
@@ -324,6 +324,8 @@ public final class MonitorService extends Service {
         }
         checkSetting(token, LOCATION_OFF, "위치 끄기", () -> !location());
         checkSetting(token, SAVER, "절전 모드", power::isPowerSaveMode);
+        ensureStopped(token, State.NAVER, "네이버지도", RUNNING_NAVER, STOP_NAVER);
+        ensureStopped(token, State.TMAP, "티맵", RUNNING_TMAP, STOP_TMAP);
     }
 
     private void finishNav(int token, String pkg, String label, DeviceControl.Operation runningOp,
@@ -345,6 +347,24 @@ public final class MonitorService extends Service {
                     : " · 안내 종료 버튼 확인 안 됨"));
         }
         operate(token, stopOp, label + " 종료");
+    }
+
+    private void ensureStopped(int token, String pkg, String label, DeviceControl.Operation runningOp,
+                               DeviceControl.Operation stopOp) {
+        if (!current(token) || getPackageManager().getLaunchIntentForPackage(pkg) == null) return;
+        for (int attempt = 0; attempt < 3 && current(token); attempt++) {
+            SystemClock.sleep(400);
+            String runningApp = operate(token, runningOp, null);
+            if ("no".equals(runningApp)) {
+                State.log(this, label + " · 종료 상태 확인");
+                return;
+            }
+            if (!"yes".equals(runningApp) || operate(token, stopOp, label + " 재종료") == null) break;
+        }
+        if (current(token)) {
+            boolean stopped = "no".equals(operate(token, runningOp, null));
+            State.log(this, label + (stopped ? " · 종료 상태 확인" : " · 종료 상태 확인 실패"));
+        }
     }
 
     private boolean location() { return getSystemService(LocationManager.class).isLocationEnabled(); }

@@ -33,6 +33,7 @@ public final class RouteAccess extends AccessibilityService {
         if (service == null) return false;
         boolean pressed = false;
         boolean back = false;
+        int clearFrames = 0;
         long start = android.os.SystemClock.elapsedRealtime();
         for (int pass = 0; pass < 11 && current.getAsBoolean(); pass++) {
             final boolean hadAction = pressed;
@@ -47,7 +48,8 @@ public final class RouteAccess extends AccessibilityService {
             } finally {
                 step.cancel(false);
             }
-            if (result == 4) return true;
+            clearFrames = result == 4 ? clearFrames + 1 : 0;
+            if (clearFrames >= 2) return true;
             if (result == 3) return false;
             if (result == 2) back = true;
             if (result == 1) pressed = true;

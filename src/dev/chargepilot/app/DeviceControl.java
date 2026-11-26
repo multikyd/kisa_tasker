@@ -106,7 +106,10 @@ public final class DeviceControl extends Binder {
                         "-c", "android.intent.category.LAUNCHER", "-p", target, "-f", "0x10200000");
             case RUNNING_TMAP:
             case RUNNING_NAVER:
-                return commandResult("pidof", target).code == 0 ? "yes" : "no";
+                boolean mainRunning = commandResult("pidof", target).code == 0;
+                boolean tmapWifiRunning = operation == Operation.RUNNING_TMAP
+                        && commandResult("pidof", "com.skt.wifiagent.tmap").code == 0;
+                return mainRunning || tmapWifiRunning ? "yes" : "no";
             case STOP_TMAP:
             case STOP_NAVER:
                 return command("am", "force-stop", "--user", "" + user, target);
