@@ -1,9 +1,9 @@
 {
-  "versionCode": 4,
-  "versionName": "1.0.3",
+  "versionCode": 5,
+  "versionName": "1.0.4",
   "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
-  "sha256": "ebac5655a65c5e35bc1eb42ab0757ffcd32831b486c7d8f9add7b566663e4192",
+  "sha256": "7f2ccb0a53e4543eadffce5bd2459616ec89d88d9baeac6d32092aadd95c7b08",
   "releaseNotes": {
-    "ko": "갤럭시에서 Wi-Fi 핫스팟과 티맵 실행을 정상화하고, 전원 차단 뒤 두 내비의 화면과 안내 서비스가 종료되는지 확인합니다."
+    "ko": "충전 연결 후 자동으로 실행할 내비를 티맵이나 네이버지도 중에서 선택할 수 있습니다."
   }
 }

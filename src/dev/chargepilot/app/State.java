@@ -11,6 +11,7 @@ final class State {
     static final String CUTOFF = "cutoff";
     static final String BOOT = "boot";
     static final String DELAY = "delay";
+    static final String START_NAV = "startNav";
     static final String HOTSPOT = "hotspot";
     static final String OWNED_HOTSPOT = "ownedHotspot";
     static final String CANCEL = "cancel";
@@ -22,6 +23,14 @@ final class State {
 
     static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences("vehicle", Context.MODE_PRIVATE);
+    }
+
+    static String startNav(SharedPreferences prefs) {
+        return NAVER.equals(prefs.getString(START_NAV, TMAP)) ? NAVER : TMAP;
+    }
+
+    static String navName(String pkg) {
+        return NAVER.equals(pkg) ? "네이버지도" : "티맵";
     }
 
     static synchronized void log(Context context, String line) {

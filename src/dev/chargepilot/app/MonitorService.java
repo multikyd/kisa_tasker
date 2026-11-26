@@ -83,7 +83,7 @@ public final class MonitorService extends Service {
                     int token = generation;
                     worker.execute(() -> {
                         if (current(token)) {
-                            operate(token, LAUNCH_TMAP, "티맵 실행");
+                            launchSelectedNav(token);
                             main.post(MonitorService.this::tick);
                         }
                     });
@@ -236,7 +236,7 @@ public final class MonitorService extends Service {
             status((cycle.isWired() ? "주행 준비" : "종료 유예") + " · " + (remaining + 999) / 1000 + "초");
             main.postDelayed(clock, Math.min(1_000, remaining));
         } else if (waitingUnlock) {
-            status("잠금을 해제하면 티맵을 실행합니다");
+            status("잠금 해제 후 " + State.navName(State.startNav(prefs)) + " 실행");
         } else {
             status(cycle.isActive() ? "주행 모드" : "유선 전원 연결 대기");
         }
@@ -297,7 +297,7 @@ public final class MonitorService extends Service {
         }
         if (!current(token)) return;
         if (!getSystemService(KeyguardManager.class).isDeviceLocked()) {
-            operate(token, LAUNCH_TMAP, "티맵 실행");
+            launchSelectedNav(token);
         } else {
             main.post(() -> {
                 if (!current(token)) return;
@@ -308,6 +308,11 @@ public final class MonitorService extends Service {
                 tick();
             });
         }
+    }
+
+    private void launchSelectedNav(int token) {
+        String pkg = State.startNav(prefs);
+        operate(token, State.NAVER.equals(pkg) ? LAUNCH_NAVER : LAUNCH_TMAP, State.navName(pkg) + " 실행");
     }
 
     private void endDrive(int token) {

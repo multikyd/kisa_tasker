@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -81,6 +83,18 @@ public final class MainActivity extends Activity {
 
         LinearLayout timing = card(page);
         timing.addView(text("충전 자동화 설정", 20, DARK, true));
+        timing.addView(text("충전 연결 시 실행할 내비", 16, DARK, false));
+        RadioGroup navChoices = new RadioGroup(this);
+        navChoices.setOrientation(LinearLayout.HORIZONTAL);
+        RadioButton tmap = addNavChoice(navChoices, State.TMAP);
+        RadioButton naver = addNavChoice(navChoices, State.NAVER);
+        navChoices.check(State.NAVER.equals(State.startNav(prefs)) ? naver.getId() : tmap.getId());
+        navChoices.setOnCheckedChangeListener((group, id) -> {
+            if (id == tmap.getId() || id == naver.getId()) {
+                prefs.edit().putString(State.START_NAV, id == naver.getId() ? State.NAVER : State.TMAP).apply();
+            }
+        });
+        timing.addView(navChoices);
         int seconds = prefs.getInt(State.DELAY, 3);
         TextView delay = text("연결 후 대기  " + seconds + "초", 16, DARK, false);
         timing.addView(delay);
@@ -130,6 +144,17 @@ public final class MainActivity extends Activity {
         log.setLineSpacing(dp(3), 1);
         recent.addView(log);
         return scroll;
+    }
+
+    private RadioButton addNavChoice(RadioGroup group, String pkg) {
+        RadioButton button = new RadioButton(this);
+        button.setId(View.generateViewId());
+        button.setText(State.navName(pkg));
+        button.setTextSize(15);
+        button.setTextColor(DARK);
+        button.setMinHeight(dp(48));
+        group.addView(button, new RadioGroup.LayoutParams(0, -2, 1f));
+        return button;
     }
 
     private void addSwitch(LinearLayout layout, String title, String key) {
