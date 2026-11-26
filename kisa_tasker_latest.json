@@ -1,9 +1,9 @@
 {
-  "versionCode": 2,
-  "versionName": "1.0.1",
+  "versionCode": 4,
+  "versionName": "1.0.3",
   "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
-  "sha256": "87e4882433761ac3f0f5d43995b96c3e4f120f836abd6d036c887172c6586e23",
+  "sha256": "ebac5655a65c5e35bc1eb42ab0757ffcd32831b486c7d8f9add7b566663e4192",
   "releaseNotes": {
-    "ko": "전원 차단 뒤 티맵의 백그라운드 서비스가 다시 시작되면 재종료하고, 두 내비의 종료 상태를 확인합니다."
+    "ko": "갤럭시에서 Wi-Fi 핫스팟과 티맵 실행을 정상화하고, 전원 차단 뒤 두 내비의 화면과 안내 서비스가 종료되는지 확인합니다."
   }
 }

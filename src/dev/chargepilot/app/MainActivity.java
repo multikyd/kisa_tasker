@@ -117,18 +117,18 @@ public final class MainActivity extends Activity {
         permissions.addView(access);
         permissions.addView(text("접근성을 켜면 종료 시 두 내비 앱의 안내 종료 버튼을 확인합니다. 잠금은 직접 해제해야 합니다.", 13, MUTED, false));
 
-        LinearLayout recent = card(page);
-        recent.addView(text("최근 동작", 20, DARK, true));
-        log = text("", 13, MUTED, false);
-        log.setLineSpacing(dp(3), 1);
-        recent.addView(log);
-
         LinearLayout update = card(page);
         update.addView(text("앱 업데이트", 20, DARK, true));
         update.addView(text("설치된 버전 " + updater.versionName(), 14, MUTED, false));
         updateAction = button("업데이트 확인", true);
         updateAction.setOnClickListener(v -> updater.check(true));
         update.addView(updateAction);
+
+        LinearLayout recent = card(page);
+        recent.addView(text("최근 동작", 20, DARK, true));
+        log = text("", 13, MUTED, false);
+        log.setLineSpacing(dp(3), 1);
+        recent.addView(log);
         return scroll;
     }
 

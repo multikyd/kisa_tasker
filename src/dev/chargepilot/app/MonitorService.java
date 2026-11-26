@@ -107,7 +107,7 @@ public final class MonitorService extends Service {
         wake = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "kisa_tasker:charge_transition");
         wake.setReferenceCounted(false);
         args = new Shizuku.UserServiceArgs(new ComponentName(this, DeviceControl.class))
-                .daemon(false).processNameSuffix("device_control").version(2);
+                .daemon(false).processNameSuffix("device_control").version(4);
         NotificationManager notifications = getSystemService(NotificationManager.class);
         notifications.createNotificationChannel(new NotificationChannel(CHANNEL,
                 "충전 연결 감시", NotificationManager.IMPORTANCE_LOW));
@@ -313,8 +313,8 @@ public final class MonitorService extends Service {
     private void endDrive(int token) {
         if (!current(token)) return;
         State.log(this, "전원 차단 10초 경과 · 종료 시작");
-        finishNav(token, State.NAVER, "네이버지도", RUNNING_NAVER, LAUNCH_NAVER, STOP_NAVER);
-        finishNav(token, State.TMAP, "티맵", RUNNING_TMAP, LAUNCH_TMAP, STOP_TMAP);
+        finishNav(token, State.NAVER, "네이버지도", NAV_ACTIVE_NAVER, LAUNCH_NAVER, STOP_NAVER);
+        finishNav(token, State.TMAP, "티맵", NAV_ACTIVE_TMAP, LAUNCH_TMAP, STOP_TMAP);
         if (prefs.getBoolean(State.OWNED_HOTSPOT, false)
                 && operate(token, HOTSPOT_OFF, "Wi-Fi 핫스팟 끄기") != null) {
             prefs.edit().remove(State.OWNED_HOTSPOT).apply();
@@ -324,8 +324,8 @@ public final class MonitorService extends Service {
         }
         checkSetting(token, LOCATION_OFF, "위치 끄기", () -> !location());
         checkSetting(token, SAVER, "절전 모드", power::isPowerSaveMode);
-        ensureStopped(token, State.NAVER, "네이버지도", RUNNING_NAVER, STOP_NAVER);
-        ensureStopped(token, State.TMAP, "티맵", RUNNING_TMAP, STOP_TMAP);
+        ensureStopped(token, State.NAVER, "네이버지도", NAV_ACTIVE_NAVER, STOP_NAVER);
+        ensureStopped(token, State.TMAP, "티맵", NAV_ACTIVE_TMAP, STOP_TMAP);
     }
 
     private void finishNav(int token, String pkg, String label, DeviceControl.Operation runningOp,

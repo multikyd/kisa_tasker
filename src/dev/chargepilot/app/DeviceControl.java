@@ -1,6 +1,8 @@
 package dev.chargepilot.app;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -24,17 +26,18 @@ public final class DeviceControl extends Binder {
     private static final int CALL = IBinder.FIRST_CALL_TRANSACTION;
     enum Operation {
         PING, WAKE, NORMAL, SAVER, ONLINE, AIRPLANE, LOCATION_ON, LOCATION_OFF,
-        HOTSPOT_ON, HOTSPOT_OFF, LAUNCH_TMAP, LAUNCH_NAVER, RUNNING_TMAP, RUNNING_NAVER,
+        HOTSPOT_ON, HOTSPOT_OFF, LAUNCH_TMAP, LAUNCH_NAVER, NAV_ACTIVE_TMAP, NAV_ACTIVE_NAVER,
         STOP_TMAP, STOP_NAVER
     }
     private final Context context;
     private final int appUid;
     private final int user;
+    private Context shellContext;
 
-    public DeviceControl(Context appContext) throws Exception {
+    public DeviceControl(Context appContext) {
         appUid = appContext.getApplicationInfo().uid;
         user = appUid / 100000;
-        context = appContext.createPackageContext("com.android.shell", 0);
+        context = appContext;
     }
 
     static String call(IBinder binder, Operation operation) throws Exception {
@@ -102,14 +105,16 @@ public final class DeviceControl extends Binder {
                 return hotspot(operation == Operation.HOTSPOT_ON);
             case LAUNCH_TMAP:
             case LAUNCH_NAVER:
+                Intent launcher = context.getPackageManager().getLaunchIntentForPackage(target);
+                if (launcher == null || launcher.getComponent() == null) {
+                    throw new IllegalStateException("설치된 내비 실행 화면을 찾지 못함");
+                }
                 return command("am", "start", "--user", "" + user, "-a", "android.intent.action.MAIN",
-                        "-c", "android.intent.category.LAUNCHER", "-p", target, "-f", "0x10200000");
-            case RUNNING_TMAP:
-            case RUNNING_NAVER:
-                boolean mainRunning = commandResult("pidof", target).code == 0;
-                boolean tmapWifiRunning = operation == Operation.RUNNING_TMAP
-                        && commandResult("pidof", "com.skt.wifiagent.tmap").code == 0;
-                return mainRunning || tmapWifiRunning ? "yes" : "no";
+                        "-c", "android.intent.category.LAUNCHER", "-n",
+                        launcher.getComponent().flattenToShortString(), "-f", "0x10200000");
+            case NAV_ACTIVE_TMAP:
+            case NAV_ACTIVE_NAVER:
+                return hasNavigation(target) ? "yes" : "no";
             case STOP_TMAP:
             case STOP_NAVER:
                 return command("am", "force-stop", "--user", "" + user, target);
@@ -117,9 +122,43 @@ public final class DeviceControl extends Binder {
         throw new IllegalArgumentException("Unknown operation");
     }
 
+    private boolean hasNavigation(String target) throws Exception {
+        String activity = commandWithLimit(512 * 1024, "dumpsys", "activity", "activities", target);
+        String component = " u" + user + " " + target + "/";
+        for (String line : activity.split("\\R")) {
+            if (line.contains("Hist ") && line.contains(component)) return true;
+        }
+        String services = commandWithLimit(128 * 1024, "dumpsys", "activity", "services", target);
+        boolean matchingService = false;
+        for (String line : services.split("\\R")) {
+            if (line.contains("ServiceRecord{")) matchingService = line.contains(component);
+            if (matchingService && line.contains("isForeground=true")) return true;
+        }
+        return false;
+    }
+
     private int hotspotState() throws Exception {
-        WifiManager wifi = context.getSystemService(WifiManager.class);
+        WifiManager wifi = tetheringContext().getSystemService(WifiManager.class);
         return (Integer) WifiManager.class.getMethod("getWifiApState").invoke(wifi);
+    }
+
+    private Context tetheringContext() throws Exception {
+        if (shellContext != null) return shellContext;
+        // A child of the app context retains the app's AppOps attribution. Use a context
+        // whose package matches the shell UID that Shizuku uses for this service.
+        ApplicationInfo shell = context.getPackageManager().getApplicationInfo("com.android.shell", 0);
+        Class<?> activityThread = Class.forName("android.app.ActivityThread");
+        Object thread = activityThread.getMethod("currentActivityThread").invoke(null);
+        Class<?> compatibilityClass = Class.forName("android.content.res.CompatibilityInfo");
+        Object compatibility = compatibilityClass.getField("DEFAULT_COMPATIBILITY_INFO").get(null);
+        Object packageInfo = activityThread.getMethod("getPackageInfoNoCheck", ApplicationInfo.class,
+                compatibilityClass).invoke(thread, shell, compatibility);
+        Class<?> contextImpl = Class.forName("android.app.ContextImpl");
+        Method appContext = contextImpl.getDeclaredMethod("createAppContext", activityThread,
+                Class.forName("android.app.LoadedApk"));
+        appContext.setAccessible(true);
+        shellContext = (Context) appContext.invoke(null, thread, packageInfo);
+        return shellContext;
     }
 
     private String hotspot(boolean enable) throws Exception {
@@ -127,7 +166,7 @@ public final class DeviceControl extends Binder {
         if (enable && (state == 13 || state == 12)) return "already";
         if (!enable && (state == 11 || state == 10 || state == 14)) return "already";
         Class<?> managerClass = Class.forName("android.net.TetheringManager");
-        Object manager = context.getSystemService("tethering");
+        Object manager = tetheringContext().getSystemService("tethering");
         if (manager == null) throw new IllegalStateException("테더링 서비스를 찾을 수 없음");
         if (enable) {
             Class<?> callbackType = Class.forName("android.net.TetheringManager$StartTetheringCallback");
@@ -162,17 +201,25 @@ public final class DeviceControl extends Binder {
     }
 
     private static String command(String... args) throws Exception {
-        CommandResult result = commandResult(args);
+        return commandWithLimit(4096, args);
+    }
+
+    private static String commandWithLimit(int maxBytes, String... args) throws Exception {
+        CommandResult result = commandResult(maxBytes, args);
         if (result.code != 0 || result.output.contains("Error:")
                 || result.output.contains("Exception") || result.output.contains("Permission denied")) {
             String message = result.output.trim();
-            throw new IllegalStateException(message.isEmpty() ? "종료 코드 " + result.code
-                    : message.split("\\R", 2)[0]);
+            for (String line : message.split("\\R")) {
+                if (line.contains("Error:") || line.contains("Exception") || line.contains("Permission denied")) {
+                    throw new IllegalStateException(line.trim());
+                }
+            }
+            throw new IllegalStateException(message.isEmpty() ? "종료 코드 " + result.code : message);
         }
         return result.output.trim();
     }
 
-    private static CommandResult commandResult(String... args) throws Exception {
+    private static CommandResult commandResult(int maxBytes, String... args) throws Exception {
         List<String> command = new ArrayList<>(Arrays.asList(args));
         command.set(0, "/system/bin/" + command.get(0));
         java.lang.Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
@@ -181,7 +228,7 @@ public final class DeviceControl extends Binder {
             try (InputStream stream = process.getInputStream()) {
                 byte[] buffer = new byte[1024];
                 for (int size; (size = stream.read(buffer)) != -1;) {
-                    if (output.size() < 4096) output.write(buffer, 0, size);
+                    if (output.size() < maxBytes) output.write(buffer, 0, Math.min(size, maxBytes - output.size()));
                 }
             } catch (java.io.IOException ignored) {}
         }, "charge-command-output");
