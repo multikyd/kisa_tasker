@@ -1,0 +1,9 @@
+{
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "apkUrl": "https://raw.githubusercontent.com/multikyd/kisa_tasker/main/kisa_tasker.apk",
+  "sha256": "ece592f71637bd4c1f05d3e0b9302a91f40de04b7426da74a7c1765f78de856a",
+  "releaseNotes": {
+    "ko": "유선 전원 기반 주행 자동화, 10초 재연결 유예 및 앱 내 업데이트를 추가했습니다."
+  }
+}

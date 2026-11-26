@@ -1,0 +1,4 @@
+/build/
+/.signing/
+/vendor/*.pom
+__pycache__/
